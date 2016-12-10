@@ -12,22 +12,12 @@ gulp.task('default', function() {
   gulp.src('./src/assets/**/*.png')
     .pipe(gulp.dest('./out/assets/'));
 
-  gulp.src([
-    './src/webroot/core.js',
-    './src/webroot/assetManager.js',
-    './src/webroot/scenes.js',
-    './src/webroot/init.js'
-  ])
-  .pipe(concat("bundle.js"))
-  .pipe(gulp.dest("./out"));
-
-
   gulp.src('./src/*.html')
     .pipe(gulp.dest('./out/'));
-  //
-  // gulp.src('./src/coffeescripts/engine.coffee', {read: false })
-  //   .pipe(browserify({ transform: ['coffeeify'], extensions: ['.coffee'] }))
-  //   .pipe(concat('bundle.js'))
-  //   .pipe(gulp.dest('./out'));
+
+  gulp.src('./src/coffeescripts/engine.coffee', {read: false })
+    .pipe(browserify({ transform: ['coffeeify'], extensions: ['.coffee'] }))
+    .pipe(concat('bundle.js'))
+    .pipe(gulp.dest('./out'));
 
 });

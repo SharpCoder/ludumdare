@@ -28,7 +28,44 @@
 		<!-- Core framework files. -->
 		<script type="text/javascript" src="./libs/underscore.js"></script>
 		<script type="text/javascript" src="./bundle.js"></script>
+    <script type="text/javascript">
 
+      function doBootstrap() {
+
+        Framework.initialize(function() {
+
+          document.getElementById("canvas_container").onmousedown = function(evt){
+            if ( evt.offsetX === undefined || evt.offsetY === undefined ) {
+              var rect = document.getElementById("canvas_container").getBoundingClientRect();
+              Framework.doMouseDown( evt.clientX - rect.left, evt.clientY - rect.top );
+            } else {
+              Framework.doMouseDown( evt.offsetX, evt.offsetY );
+            }
+          };
+
+          document.getElementById("canvas_container").addEventListener("mousemove", function(evt) {
+      			if ( evt.offsetX === undefined || evt.offsetY === undefined ) {
+      				var rect = document.getElementById("canvas_container").getBoundingClientRect();
+      				Framework.doMouseMove( evt.clientX - rect.left, evt.clientY - rect.top );
+      			} else {
+      				Framework.doMouseMove( evt.offsetX, evt.offsetY );
+      			}
+      		});
+
+          function game_loop() {
+						Framework.doUpdate();
+            Framework.doDraw();
+						requestAnimationFrame(game_loop);
+          }
+
+					console.log("onload");
+          requestAnimationFrame(game_loop);
+
+
+        });
+
+      }
+    </script>
 	</head>
 	<body onload="doBootstrap();">
 

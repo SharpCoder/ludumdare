@@ -1,539 +1,413 @@
-// 2014-08-22
-// SharpCoder
-// This is the core framework for my ludum dare 30 entry.
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var AssetManager;
 
-Drawable = function(config) {
+module.exports = AssetManager = (function() {
+  function AssetManager() {}
 
-  for ( var prop in config) {
-    this[prop] = config[prop];
-  }
+  AssetManager.prototype.images = ["ball.png"];
 
-	// Quadrants
-	this.quadrant = 0;
+  AssetManager.prototype.sounds = [];
 
-	config = config || {};
-	this.x = config.x || 0;
-	this.y = config.y || 0;
-	this.vx = config.vx || 0;
-	this.vy = config.vy || 0;
-	this.ox = config.ox || 0;
-	this.oy = config.oy || 0;
-	this.width = config.width || 0;
-	this.height = config.height || 0;
-	this.scale = config.scale || 1.0;
-	this.text = config.text || '';
-	this.visible = config.visible;
-	this.font = config.font || "12pt 'Josefin Sans'";
-	this.fontColor = config.fontColor || '#ffffff';
-	this.name = config.name || '';
+  AssetManager.prototype.loaded = {};
 
-	this.animate = false;
-	this.animations = config.animations || new Array();
-	this.animation_index = 0;
+  AssetManager.prototype.loaded_sounds = {};
 
-	// The gravity standard follow the gravity sources.
-	this.gravity_source = config.gravity_source || false;
-	this.gravity_standard = config.gravity_standard || false;
+  AssetManager.prototype._processSound = function(index, callback) {
+    var sound;
+    if (index >= this.sounds.length) {
+      if (callback != null) {
+        callback();
+        return;
+      }
+    }
+    sound = new Audio('./sounds/' + this.sounds[index]);
+    this.loaded_sounds[this.sounds[index]] = sound;
+    return this._processSound(index + 1, callback);
+  };
 
-	this.rotation = config.rotation;
-	this.rox = config.rox || 0; // Rotation offset x.
-	this.roy = config.roy || 0; // Rotation offset y.
-	this.assets = new Array();
-	this.parent = null;
-	this.events = {};
+  AssetManager.prototype._process = function(index, callback) {
+    var image;
+    console.log(this.images);
+    if (index >= this.images.length) {
+      this._processSound(0, callback);
+      return;
+    }
+    image = new Image();
+    image.onload = (function(_this) {
+      return function() {
+        return _this._process(index + 1, callback);
+      };
+    })(this);
+    image.src = './assets/' + this.images[index];
+    return this.loaded[this.images[index]] = image;
+  };
 
-	this.visible = (this.visible === undefined) ? true : this.visible;
-	if ( config.listeners !== undefined && config.listeners !== null ) {
-		for ( var prop in config.listeners ) {
-			if ( config.listeners.hasOwnProperty(prop) ) {
-				this.events[prop] = config.listeners[prop];
-			}
-		}
-	}
+  AssetManager.prototype.initialize = function(callback) {
+    return this._process(0, callback);
+  };
 
-	// Load the image, if applicable.
-	if ( config.image !== undefined && config.image !== null ) {
-		this.image = Assets.Get(config.image);
-		if ( this.width === 0 )
-			this.width = this.image.width;
-		if ( this.height === 0 )
-			this.height = this.image.height;
-	}
+  AssetManager.prototype.get = function(asset) {
+    if (this.loaded[asset] != null) {
+      return this.loaded[asset];
+    } else {
+      throw "Asset '" + asset + "' not found";
+    }
+  };
 
-	// Trigger some events.
-	this.doInvoke("onload");
-
-};
-
-Drawable.prototype.isCollided = function(x, y) {
-	var dx = this.x;
-	var dy = this.y - this.height;
-	if ( x > dx && y > dy && x < (dx + this.width) && y < (dy + this.height) )
-		return true;
-
-	return false;
-}
-
-Drawable.prototype.doInvoke = function(evt, arg1, arg2) {
-	if ( this.events !== undefined && this.events !== null ) {
-		if ( this.events[evt] !== undefined && this.events[evt] !== null ) {
-			this.events[evt].call(this, arg1, arg2);
-		}
-	}
-
-	// Bubble the events down.
-	for ( var i = 0; i < this.assets.length; i++ ) {
-		this.assets[i].doInvoke.call( this.assets[i], evt, arg1, arg2 );
-	}
-}
-
-Drawable.prototype.doInvokeUp = function(evt, arg1, arg2) {
-	if ( this.parent !== undefined && this.parent !== null ) {
-		if ( this.parent.events[evt] !== undefined && this.parent.events[evt] !== null ) {
-			this.parent.events[evt].call(this, arg1, arg2);
-		}
-
-		this.parent.doInvokeUp.call( this.parent, evt, arg1, arg2 );
-	}
-}
-
-Drawable.prototype.doUpdate = function() {
-	this.doInvoke("onupdate");
-	this.x += this.vx;
-	this.y += this.vy;
-
-	// *************
-	// GRAVITY HERE
-	if ( this.gravity_standard ) {
-
-		// Find the source.
-		var gConst = 0.000001;
-		var mSource = 10000000;
-		var mSelf = 100;
-		var source = Framework.GetGravitySource();
-		if ( source !== undefined && source !== null ) {
-			var distance = Math.sqrt( Math.pow( this.x - source.x, 2 ) + Math.pow( this.y - source.y, 2 ));
-			var force = gConst * ((mSource * mSelf) / Math.pow(distance,2));
-			if ( this.x > (source.x)) {
-				this.vx -= force;
-			} else {
-				this.vx += force;
-			}
-
-			if ( this.y > source.y  ) {
-				this.vy -= force;
-			} else {
-				this.vy += force;
-			}
-		}
-	}
-
-	// *************
-	// Quadranting system
-	this.quadrant = ~~(this.y / 50);
-
-	// Update the assets.
-	this.doInvoke("onupdateassets");
-	for ( var i = 0; i < this.assets.length; i++ ) {
-		this.assets[i].doUpdate.call(this.assets[i]);
-	}
-};
-
-Drawable.prototype.doDraw = function( ctx ) {
-	if ( !this.visible ) return;
-
-	// if ( this.animate ) {
-	// 	this.animation_count = (this.animation_count || 5) - 1;
-	// 	if ( this.animation_count <= 0 ) {
-	// 		if ( this.animation_index > this.animations.length ) {
-	// 			this.doInvoke("onafteranimation");
-	// 		} else {
-	// 			this.image = Assets.Get(this.animations[this.animation_index]);
-	// 			this.animation_index = (this.animation_index + 1);
-	// 			this.animation_count = 5;
-	// 		}
-	// 	}
-	// }
-
-	if ( this.image !== undefined && this.image !== null ) {
-		// if ( this.rotation === undefined || this.rotation === null ) {
-		// 	ctx.drawImage(this.image, this.x + this.ox, this.y + this.oy, this.image.width * this.scale, this.image.height * this.scale);
-		// } else {
-			var cx = this.x;
-			var cy = this.y;
-			var px = this.x - (this.image.width / 2) + this.rox;
-			var py = this.y - (this.image.height / 2) + this.roy;
-			ctx.save();
-			ctx.translate(cx, cy);
-			ctx.rotate(this.rotation * Math.PI / 180);
-			ctx.translate(-cx, -cy);
-			ctx.drawImage(this.image, px + this.ox, py + this.oy, this.image.width * this.scale, this.image.height * this.scale);
-			ctx.restore();
-		// }
-	}
-
-	if ( this.text !== undefined && this.text !== null && this.text.length > 0 ) {
-		ctx.font = this.font;
-		ctx.fillStyle = this.fontColor;
-		ctx.fillText( this.text, this.x + this.ox, this.y + this.oy );
-	}
-
-	// Draw the assets.
-	this.doInvoke("ondraw", ctx);
-	this.doInvoke("ondrawassets");
-	for ( var i = 0; i < this.assets.length; i++ ) {
-		this.assets[i].doDraw.call( this.assets[i], ctx );
-	}
-};
-
-Drawable.prototype.hide = function() {
-	this.visible = false;
-}
-
-Drawable.prototype.getAsset = function(name) {
-	for ( var i = 0; i < this.assets.length; i++ ) {
-		if ( this.assets[i].name == name )
-			return this.assets[i];
-	}
-};
-
-Drawable.prototype.getAssets = function(name) {
-	var result = [];
-
-	for ( var i = 0; i < this.assets.length; i++ ) {
-		if ( this.assets[i].name == name )
-			result.push(this.assets[i]);
-	}
-	return result;
-};
-
-Drawable.prototype.getAssetsInQuadrant = function(quadrant) {
-	var result = [];
-	for ( var i= 0; i < this.assets.length; i++ )
-		if ( this.assets[i].quadrant === quadrant )
-			result.push(this.assets[i]);
-	return result;
-}
-
-Drawable.prototype.removeAsset = function( drawable ) {
-	var swap = false;
-	var items = new Array();
-	for ( var i = 0; i < this.assets.length; i++ ) {
-		if ( this.assets[i] !== drawable )
-			items.push(this.assets[i]);
-	}
-	delete this.assets;
-	this.assets = items;
-}
-
-Drawable.prototype.addAsset = function( drawable ) {
-	this.doInvoke("onaddasset");
-	if ( drawable !== undefined && drawable !== null ) {
-		this.assets.push(drawable);
-		drawable.parent = this;
-	}
-}
-
-Framework = (function() {
-
-	var active_scene = null;
-	var scenes = new Array();
-	var ctx;
-
-	return {
-
-		Initialize: function() {
-			var canvas = document.getElementById('canvas');
-			ctx = canvas.getContext('2d');
-		},
-
-		loadScene: function( name ) {
-			for ( var i = 0; i < scenes.length; i++ ) {
-				if ( scenes[i].name === name ) {
-					active_scene = scenes[i];
-					active_scene.doInvoke.call(active_scene, "onreset");
-					return;
-				}
-			}
-		},
-
-		addScene: function( scene ) {
-			scenes.push( scene );
-			if ( active_scene === null || active_scene === undefined ) {
-				active_scene = scene;
-				active_scene.doInvoke.call(active_scene, "onreset");
-			}
-		},
-
-		doDraw: function() {
-
-			if ( active_scene !== undefined && active_scene !== null ) {
-				if ( active_scene.doDraw !== undefined ) {
-					ctx.clearRect(0, 0, 800, 800);
-					active_scene.doDraw.call(active_scene, ctx);
-				}
-			}
-		},
-
-		saveContext: function() {
-			try {
-			    if ('localStorage' in window && window['localStorage'] !== null) {
-			    	localStorage["context"] = JSON.stringify(this.GetContext());
-			    }
-			} catch (e) { }
-		},
-
-		loadContext: function() {
-			try {
-			    if ('localStorage' in window && window['localStorage'] !== null) {
-			    	this.SetContext(JSON.parse(localStorage["context"]));
-			    }
-			} catch (e) { }
-		},
-
-		setContext: function( obj ) {
-			this.context = obj;
-		},
-
-		getContext: function() {
-			return this.context;
-		},
-
-		DoMouseDown: function(x, y) {
-			if ( active_scene !== undefined && active_scene !== null ) {
-				active_scene.doInvoke.call( active_scene, "onmousedown", x, y);
-			}
-		},
-
-		DoMouseMove: function(x, y) {
-			if ( active_scene !== undefined && active_scene !== null ) {
-				active_scene.doInvoke.call( active_scene, "onmousemove", x, y);
-			}
-		},
-
-		doUpdate: function() {
-
-			if ( active_scene !== undefined && active_scene !== null ) {
-				if ( active_scene.doUpdate !== undefined ) {
-					active_scene.doUpdate.call(active_scene);
-				}
-			}
-
-		},
-
-		GetGravitySource: function() {
-			if ( active_scene !== undefined && active_scene !== null ) {
-				for ( var i = 0; i < active_scene.assets.length; i++ ) {
-					if ( active_scene.assets[i].gravity_source ) {
-						return active_scene.assets[i];
-					}
-				}
-			}
-		}
-
-	};
+  return AssetManager;
 
 })();
 
-// 2014-08-22
-// SharpCoder
-// This is the asset manager for my ludum dare 30 entry.
-Assets = (function() {
 
-	var images = [
-    'ball.png'
-	];
+},{}],2:[function(require,module,exports){
+var Drawable;
 
-	var sounds = [
-	];
+module.exports = Drawable = (function() {
+  Drawable.prototype.x = 0;
 
-	var loaded = {};
-	var loaded_sound = {};
-	var index = 0;
+  Drawable.prototype.y = 0;
 
-	function process_sound( i, callback ) {
-		if ( i >= sounds.length ) {
-			if ( callback !== undefined && callback !== null )
-				callback.call(this);
-			return;
-		}
+  Drawable.prototype.vx = 0;
 
-		var sound = new Audio('./sounds/' + sounds[i]);
-		loaded_sound[sounds[i]] = sound;
-		process_sound(i + 1, callback);
-	}
+  Drawable.prototype.vy = 0;
 
-	function process( i, callback ) {
-		if ( i >= images.length ) {
-			process_sound( 0, callback );
-			return;
-		}
+  Drawable.prototype.ox = 0;
 
-		var image = new Image();
-		image.onload = function() {
-			process( i + 1, callback );
-		};
-		image.src = './assets/' + images[i];
-		loaded[images[i]] = image;
-	}
+  Drawable.prototype.oy = 0;
 
-	return {
-		Initialize: function( callback ) {
-			process(0, callback);
-		},
-		Get: function(asset) {
-			if ( loaded[asset] !== undefined && loaded[asset] !== null ) {
-				return loaded[asset];
-			}
-		},
-		GetAudio: function( asset ) {
-			var audio_test = new Audio();
-			if ( audio_test.canPlayType( "audio/wav" )) {
-				try {
-					// Make sure it's the wav type.
-					asset = asset.replace(".mp3", ".wav");
-					return loaded_sound[asset];
-				} catch ( ex ) {}
-			} else if ( audio_test.canPlayType( "audio/mp3" )) {
-				try {
-					asset = asset.replace(".wav", ".mp3");
-					return loaded_sound[asset];
-				} catch ( ex ) { }
-			}
-		},
-		PlayAudio: function( audio_object, volume, loop ) {
-			volume = volume || 1.0;
-			loop = loop || false;
-			if ( audio_object !== undefined && audio_object !== null ) {
-				audio_object.volume = volume;
-				audio_object.loop = loop;
-				audio_object.play();
-			}
-		},
-		Play: function( asset, volume, loop ) {
-			volume = volume || 1.0;
-			loop = loop || false;
-			var sound = Assets.GetAudio( asset );
-			if ( sound !== undefined && sound !== null ) {
-				sound.volume = volume;
-				sound.loop = loop;
-				sound.play();
-			}
-		},
-		PlayInstant: function( asset, volume, loop ) {
-			volume = volume || 1.0;
-			loop = loop || false;
-			var sound = new Audio(Assets.GetAudio( asset ).src);
-			if ( sound !== undefined && sound !== null ) {
-				sound.volume = volume;
-				sound.loop = loop;
-				sound.play();
-			}
-		}
-	};
+  Drawable.prototype.width = 0;
 
-})();
+  Drawable.prototype.height = 0;
 
-Scenes = (function() {
-  return {
-    Initialize: function() {
+  Drawable.prototype.scale = 1.0;
 
-      one = new Drawable({
-        image: "ball.png",
-        count: 0,
-        x: 220,
-        y: 200,
-        listeners: {
-          onupdate: function() {
-            this.scale = 20 + Math.sin(this.count * 0.2) * 10
+  Drawable.prototype.text = null;
 
-            var newCount = (this.count + 1) % (10 * Math.PI);
-            if (newCount < this.count) {
-              this.count = 0;
-            } else {
-              this.count = newCount;
-            }
-          }
-        }
-      });
+  Drawable.prototype.font = "12pt 'Oxygen'";
 
-      game = new Drawable({
-        listeners: {
-          ondraw: function(ctx) {
-            //ctx.clearRect(0, 0, 800, 800);
-            //ctx.save();
-            ctx.fillRect(0, 0, 800, 600);
-            ctx.fillStyle = "#000";
-            ctx.fill();
-            //ctx.restore();
-          }
-        }
-      });
+  Drawable.prototype.fontColor = "#FFFFFF";
 
-      game.addAsset(one);
+  Drawable.prototype.animate = false;
 
-      Framework.addScene(game);
+  Drawable.prototype.animation_index = 0;
+
+  Drawable.prototype.rotation = 0;
+
+  Drawable.prototype.rox = 0;
+
+  Drawable.prototype.roy = 0;
+
+  Drawable.prototype.parent = null;
+
+  Drawable.prototype.name = null;
+
+  Drawable.prototype.visible = true;
+
+  function Drawable(config) {
+    var key, ref, value;
+    if (config == null) {
+      config = {};
+    }
+    this.animations = new Array();
+    for (key in config) {
+      value = config[key];
+      this[key] = value;
+    }
+    this.children = new Array();
+    this.events = {};
+    if (config.listeners != null) {
+      ref = config.listeners;
+      for (key in ref) {
+        value = ref[key];
+        this.events[key] = value;
+      }
+    }
+    if ((config.image != null) || (config.src != null)) {
+      this.image = AssetManager.get(config.image || config.src);
+      if (this.width === 0) {
+        this.width = this.image.width;
+      }
+      if (this.height === 0) {
+        this.height = this.image.height;
+      }
     }
   }
+
+  Drawable.prototype.show = function() {
+    return this.visible = true;
+  };
+
+  Drawable.prototype.hide = function() {
+    return this.visible = false;
+  };
+
+  Drawable.prototype.invoke = function(event, arg1, arg2) {};
+
+  Drawable.prototype.doDraw = function(scene, ctx) {
+    var asset, cx, cy, i, len, px, py, ref, results;
+    if (!this.visible) {
+      return;
+    }
+    if (this.image != null) {
+      if (this.rotation != null) {
+        ctx.drawImage(this.image, this.x + this.ox, this.y + this.oy, this.width * this.scale, this.height * this.scale);
+      } else {
+        cx = this.x;
+        cy = this.y;
+        px = this.x - (this.width / 2) + this.rox;
+        py = this.y - (this.height / 2) + this.roy;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(this.rotation * Math.PI / 180);
+        ctx.translate(-cx, -cy);
+        ctx.drawImage(this.image, px + this.ox, py + this.oy, this.width * this.scale, this.height * this.scale);
+        ctx.restore();
+      }
+    }
+    if ((this.text != null) && this.text.length > 0) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation * Math.PI / 180);
+      ctx.translate(-this.x, -this.y);
+      ctx.font = this.font;
+      ctx.fillStyle = this.fontColor;
+      ctx.fillText(this.text, this.x + this.ox, this.y + this.oy);
+      ctx.restore();
+    }
+    ref = this.children;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      asset = ref[i];
+      results.push(asset.doDraw.call(asset, scene, ctx));
+    }
+    return results;
+  };
+
+  Drawable.prototype.addAsset = function(asset) {
+    this.invoke("onaddasset");
+    if (asset != null) {
+      return this.children.push(asset);
+    }
+  };
+
+  Drawable.prototype.removeAsset = function(assetToRemove) {
+    var items;
+    items = _.filter(this.children, function(asset) {
+      return asset !== assetToRemove;
+    });
+    delete this.childrn;
+    return this.children = items;
+  };
+
+  Drawable.prototype.getAssets = function(name) {
+    return _.filter(this.children, function(asset) {
+      return asset.name === name;
+    });
+  };
+
+  Drawable.prototype.getAsset = function(name) {
+    return _.find(this.children, function(asset) {
+      return asset.name === name;
+    });
+  };
+
+  Drawable.prototype.doUpdate = function() {
+    this.invoke("onupdate");
+    this.x += this.vx;
+    this.y += this.vy;
+    return this.invoke("onupdateassets");
+  };
+
+  return Drawable;
+
 })();
 
-// 2014-08-22
-// SharpCoder
-// This is the core bootstrapper for my ludum dare 30 entry.
 
-function doBootstrap() {
+},{}],3:[function(require,module,exports){
+var AssetManagerImpl, Drawable, GameEngine, SceneLoader,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-	Assets.Initialize(function() {
+Drawable = require('./core/drawable');
 
-		// Initialize the scnees.
-		Framework.Initialize();
-		Scenes.Initialize();
-		// document.getElementById("canvas_container").addEventListener("mousedown", function(evt){
-		// 	Framework.DoMouseDown( evt.offsetX, evt.offsetY );
-		// });
+AssetManagerImpl = require('./core/assetManager');
 
+SceneLoader = require('./sceneLoader');
 
-		document.getElementById("canvas_container").onmousedown = function(evt){
-			if ( evt.offsetX === undefined || evt.offsetY === undefined ) {
-				var rect = document.getElementById("canvas_container").getBoundingClientRect();
-				Framework.DoMouseDown( evt.clientX - rect.left, evt.clientY - rect.top );
-			} else {
-				Framework.DoMouseDown( evt.offsetX, evt.offsetY );
-			}
-		};
+window.AssetManager = new AssetManagerImpl();
 
-		document.getElementById("canvas_container").addEventListener("mousemove", function(evt) {
-			if ( evt.offsetX === undefined || evt.offsetY === undefined ) {
-				var rect = document.getElementById("canvas_container").getBoundingClientRect();
-				Framework.DoMouseMove( evt.clientX - rect.left, evt.clientY - rect.top );
-			} else {
-				Framework.DoMouseMove( evt.offsetX, evt.offsetY );
-			}
-		});
+GameEngine = (function() {
+  GameEngine.prototype.activeScene = null;
 
-    function game_loop() {
-      Framework.doUpdate();
-      Framework.doDraw();
-      requestAnimationFrame(game_loop);
+  GameEngine.prototype.scenes = [];
+
+  function GameEngine() {
+    this.postInitialize = bind(this.postInitialize, this);
+    this.width = 800;
+    this.height = 600;
+  }
+
+  GameEngine.prototype.postInitialize = function(callback) {
+    this.canvas = document.getElementById('canvas');
+    this.ctx = canvas.getContext('2d');
+    new SceneLoader(this);
+    if (callback != null) {
+      return callback();
     }
+  };
+
+  GameEngine.prototype.initialize = function(callback) {
+    console.log("initlaize");
+    return AssetManager.initialize(this.postInitialize.bind(this, callback));
+  };
+
+  GameEngine.prototype.loadScene = function(name) {
+    var i, j, ref, results;
+    results = [];
+    for (i = j = 0, ref = this.scenes.length - 1; 0 <= ref ? j <= ref : j >= ref; i = 0 <= ref ? ++j : --j) {
+      if (this.scenes[i].name === name) {
+        this.activeScene = this.scenes[i];
+        results.push(this.activeScene.invoke("onreset"));
+      } else {
+        results.push(void 0);
+      }
+    }
+    return results;
+  };
+
+  GameEngine.prototype.addScene = function(scene) {
+    this.scenes.push(scene);
+    if (this.activeScene == null) {
+      this.activeScene = scene;
+      return this.activeScene.invoke("onreset");
+    }
+  };
+
+  GameEngine.prototype.doDraw = function() {
+    if (this.activeScene != null) {
+      this.ctx.clearRect(0, 0, 800, 800);
+      return this.activeScene.doDraw(this.activeScene, this.ctx);
+    }
+  };
+
+  GameEngine.prototype.doUpdate = function() {
+    var ref;
+    if (this.activeScene != null) {
+      return (ref = this.activeScene) != null ? ref.doUpdate(this.activeScene) : void 0;
+    }
+  };
+
+  GameEngine.prototype.doMouseDown = function(x, y) {
+    if (this.activeScene != null) {
+      return this.activeScene.invoke("onmousedown", x, y);
+    }
+  };
+
+  GameEngine.prototype.doMouseMove = function(x, y) {
+    if (this.activeScene != null) {
+      return this.activeScene.invoke("onmousemove", x, y);
+    }
+  };
+
+  return GameEngine;
+
+})();
+
+window.Framework = new GameEngine();
 
 
+},{"./core/assetManager":1,"./core/drawable":2,"./sceneLoader":4}],4:[function(require,module,exports){
+var SceneLoader, TestArea;
 
-    requestAnimationFrame(game_loop);
-    //
-		// function update_loop() {
-		// 	Framework.doUpdate();
-		// 	setTimeout( update_loop, 20 );
-		// }
-		//
-		// function draw_loop() {
-		// 	Framework.doDraw();
-		// 	setTimeout( draw_loop, 20 );
-		// }
-		//
-		// update_loop();
-		// draw_loop();
+TestArea = require('./scenes/testArea');
 
-	});
+module.exports = SceneLoader = (function() {
+  function SceneLoader(framework) {
+    framework.addScene(new TestArea());
+  }
 
-}
+  return SceneLoader;
+
+})();
+
+
+},{"./scenes/testArea":5}],5:[function(require,module,exports){
+var Drawable, OneThing, TestArea,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+Drawable = require('../core/drawable');
+
+OneThing = (function(superClass) {
+  extend(OneThing, superClass);
+
+  function OneThing() {
+    return OneThing.__super__.constructor.apply(this, arguments);
+  }
+
+  OneThing.prototype.name = "title_a";
+
+  OneThing.prototype.name = "title_a";
+
+  OneThing.prototype.font = "24pt 'Oxygen'";
+
+  OneThing.prototype.fontColor = "#FF0000";
+
+  OneThing.prototype.x = 330;
+
+  OneThing.prototype.y = 202;
+
+  OneThing.prototype.text = "ONE";
+
+  OneThing.prototype.fontSize = 24;
+
+  OneThing.prototype.fontDir = true;
+
+  OneThing.prototype.count = 0;
+
+  OneThing.prototype.doDraw = function(activeScene, ctx) {
+    this.fontSize = 20 + Math.sin(this.count * 0.2) * 10;
+    this.x = 330 - (20 + Math.sin(this.count * 0.2) * 10);
+    this.count = (this.count + 1) % (10 * Math.PI);
+    this.font = Math.round(this.fontSize) + "pt 'Oxygen'";
+    return OneThing.__super__.doDraw.call(this, activeScene, ctx);
+  };
+
+  return OneThing;
+
+})(Drawable);
+
+module.exports = TestArea = (function(superClass) {
+  extend(TestArea, superClass);
+
+  TestArea.prototype.name = "TestArea";
+
+  function TestArea() {
+    this.doDraw = bind(this.doDraw, this);
+    var one, title;
+    TestArea.__super__.constructor.apply(this, arguments);
+    one = new OneThing();
+    title = new Drawable({
+      name: "title",
+      font: "24pt 'Oxygen'",
+      x: 150,
+      y: 200,
+      text: "Get to the           escape pod"
+    });
+    this.addAsset(title);
+    this.addAsset(one);
+  }
+
+  TestArea.prototype.doDraw = function(activeScene, ctx) {
+    ctx.fillRect(0, 0, 800, 600);
+    ctx.fillStyle = "#000";
+    ctx.fill();
+    return TestArea.__super__.doDraw.call(this, activeScene, ctx);
+  };
+
+  return TestArea;
+
+})(Drawable);
+
+
+},{"../core/drawable":2}]},{},[3])

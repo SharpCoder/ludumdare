@@ -1,16 +1,23 @@
 Drawable = require('../core/drawable')
 
 class OneThing extends Drawable
+  name : "title_a"
   name: "title_a"
+  font: "24pt 'Oxygen'"
+  fontColor: "#FF0000"
   x: 330
   y: 202
+  text: "ONE"
+  fontSize: 24
+  fontDir: true
   count: 0
 
   doDraw: (activeScene, ctx) ->
-    
-    @scale = 20 + Math.sin(@count * 0.2) * 10
+    @fontSize = 20 + Math.sin(@count * 0.2) * 10
     @x = 330 - (20 + Math.sin(@count * 0.2) * 10)
     @count = (@count + 1) % (10 * Math.PI)
+
+    @font = Math.round(@fontSize) + "pt 'Oxygen'"
     super activeScene, ctx
 
 
@@ -21,9 +28,7 @@ module.exports = class TestArea extends Drawable
   constructor: ->
     super
 
-    one = new OneThing({
-      src: "ball.png"
-    })
+    one = new OneThing()
     title = new Drawable({
       name: "title"
       font: "24pt 'Oxygen'"
@@ -32,12 +37,12 @@ module.exports = class TestArea extends Drawable
       text: "Get to the           escape pod"
     })
 
-    #@addAsset(title)
+    @addAsset(title)
     @addAsset(one)
 
 
   doDraw: (activeScene, ctx) =>
-    ctx.rect(0, 0, 800, 600)
+    ctx.fillRect(0, 0, 800, 600)
     ctx.fillStyle = "#000"
     ctx.fill()
 
