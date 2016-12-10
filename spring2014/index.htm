@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>
+		</title>
+		<link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
+		<style type="text/css">
+			* {
+				margin: 0px;
+				font-family: 'Electrolize', 'sans-serif';
+				overflow: hidden;
+			}
+			
+			body {
+				background-image: url('star_bg.png');
+				background-repeat: norepeat;
+				background-size: contain;
+			}
+			
+			#hud {
+				width: 800px;
+				height: 50px;
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: 10px;
+				background-color: #404040 !important;
+				border: 2px solid #5BAAEA;
+			}
+			
+			.hud_item {
+				padding: 5px;
+				color: black;
+				font-weight: bold;
+			}
+			
+			.footer {
+				color: white; 
+				position: absolute; 
+				bottom: 0px; 
+				display: inline;
+				margin: 20px;
+				font-weight: bold;
+				font-size: 20px;
+			}
+			
+			.dialog {
+				color: white;
+				position: fixed;
+				top: 280px;
+				left: 50%;
+				width: 650px;
+				height: 16em;
+				padding: 15px;
+				margin-top: -8em;
+				margin-left: -350px;
+				display: none;
+				font-size: 14pt;
+			}
+			
+			.dialog-button {
+				background-color: #277CBC;
+				border: 1px solid white;
+				padding: 10px;
+				margin-right: 150px;
+				margin-left: 150px;
+				margin-top: 20px;
+				margin-bottom: 20px;
+				text-align: center;
+				display: run-in;
+			}
+			
+			.dialog-button:hover {
+				background-color: #4D47FF;
+				cursor: pointer;
+			}
+			
+			#dialog-title {
+				color: black;
+				font-weight: bold;
+				padding-bottom: 50px;
+				font-size: 18pt;
+			}
+			
+			#dialog-buttons {
+				padding-top: 50px;
+			}
+			
+			.container {
+			}
+		</style>
+		<script type="text/javascript" src="json2.js"></script>
+		<script type="text/javascript" src="jquery-1.11.0.js"></script>
+		<script type="text/javascript" src="engine.assetmgr.js"></script>
+		<script type="text/javascript" src="engine.soundmgr.js"></script>
+		<script type="text/javascript" src="engine.js"></script>
+		<script type="text/javascript" src="engine.asset.js"></script>
+		<script type="text/javascript" src="game.funcs.js"></script>
+		<script type="text/javascript" src="game.graph.js"></script>
+		<script type="text/javascript" src="game.dialog.js"></script>
+		<script type="text/javascript" src="game.assets.js"></script>
+		<script type="text/javascript" src="game.js"></script>
+		
+	</head>
+	<body>
+		<!--<div id="hud">
+			<span id="hud_money" class="hud_item"></span>
+			<span id="hud_weapon" class="hud_item"></span>
+			<span id="hud_ammo" class="hud_item"></span>
+		</div> !-->
+		<div id="container" class="container">
+		</div>
+		<div id="dialog" class="dialog">
+			<div id="dialog-title"></div>
+			<div id="dialog-message"></div>
+			<div id="dialog-buttons"></div>
+		</div>
+		<div id="msgLoading" style="margin-left: auto; margin-right: auto; width: 270px; margin-top: 300px; font-size: 72px; color: white;">
+			Loading...
+		</div>
+		<div style="margin-left: auto; margin-right: auto; width: 1000px; height: 800px; padding-top: 40px;">
+			<canvas id="primary_canvas" width="1000" height="800"></canvas>
+		</div>
+		<div class="footer">
+			SharpCoder
+		</div>
+		<div style="right: 0px;" class="footer">
+			Ludum Dare - 29
+		</div>
+	</body>
+</html>
