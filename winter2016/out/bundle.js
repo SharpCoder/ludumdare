@@ -460,12 +460,10 @@ Scenes = (function() {
       game = new Drawable({
         listeners: {
           ondraw: function(ctx) {
-            ctx.clearRect(0, 0, 800, 600);
-            ctx.save();
+            //ctx.clearRect(0, 0, 800, 600);
             ctx.rect(0, 0, 800, 600);
             ctx.fillStyle = "#000";
             ctx.fill();
-            ctx.restore();
           }
         }
       });
