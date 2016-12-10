@@ -32,26 +32,28 @@ function doBootstrap() {
 			}
 		});
 
-    // function game_loop() {
-    //   Framework.doUpdate();
-    //   Framework.doDraw();
-    //   requestAnimationFrame(game_loop);
-    // }
-    //
-    // requestAnimationFrame(game_loop);
-    //
-		function update_loop() {
-			Framework.doUpdate();
-			setTimeout( update_loop, 20 );
-		}
+    function game_loop() {
+      Framework.doUpdate();
+      Framework.doDraw();
+      requestAnimationFrame(game_loop);
+    }
 
-		function draw_loop() {
-			Framework.doDraw();
-			setTimeout( draw_loop, 20 );
-		}
 
-		update_loop();
-		draw_loop();
+
+    requestAnimationFrame(game_loop);
+    //
+		// function update_loop() {
+		// 	Framework.doUpdate();
+		// 	setTimeout( update_loop, 20 );
+		// }
+		//
+		// function draw_loop() {
+		// 	Framework.doDraw();
+		// 	setTimeout( draw_loop, 20 );
+		// }
+		//
+		// update_loop();
+		// draw_loop();
 
 	});
 

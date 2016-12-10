@@ -142,23 +142,23 @@ Drawable.prototype.doUpdate = function() {
 Drawable.prototype.doDraw = function( ctx ) {
 	if ( !this.visible ) return;
 
-	if ( this.animate ) {
-		this.animation_count = (this.animation_count || 5) - 1;
-		if ( this.animation_count <= 0 ) {
-			if ( this.animation_index > this.animations.length ) {
-				this.doInvoke("onafteranimation");
-			} else {
-				this.image = Assets.Get(this.animations[this.animation_index]);
-				this.animation_index = (this.animation_index + 1);
-				this.animation_count = 5;
-			}
-		}
-	}
+	// if ( this.animate ) {
+	// 	this.animation_count = (this.animation_count || 5) - 1;
+	// 	if ( this.animation_count <= 0 ) {
+	// 		if ( this.animation_index > this.animations.length ) {
+	// 			this.doInvoke("onafteranimation");
+	// 		} else {
+	// 			this.image = Assets.Get(this.animations[this.animation_index]);
+	// 			this.animation_index = (this.animation_index + 1);
+	// 			this.animation_count = 5;
+	// 		}
+	// 	}
+	// }
 
 	if ( this.image !== undefined && this.image !== null ) {
-		if ( this.rotation === undefined || this.rotation === null ) {
-			ctx.drawImage(this.image, this.x + this.ox, this.y + this.oy, this.image.width * this.scale, this.image.height * this.scale);
-		} else {
+		// if ( this.rotation === undefined || this.rotation === null ) {
+		// 	ctx.drawImage(this.image, this.x + this.ox, this.y + this.oy, this.image.width * this.scale, this.image.height * this.scale);
+		// } else {
 			var cx = this.x;
 			var cy = this.y;
 			var px = this.x - (this.image.width / 2) + this.rox;
@@ -169,7 +169,7 @@ Drawable.prototype.doDraw = function( ctx ) {
 			ctx.translate(-cx, -cy);
 			ctx.drawImage(this.image, px + this.ox, py + this.oy, this.image.width * this.scale, this.image.height * this.scale);
 			ctx.restore();
-		}
+		// }
 	}
 
 	if ( this.text !== undefined && this.text !== null && this.text.length > 0 ) {
