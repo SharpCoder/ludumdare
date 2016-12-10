@@ -9,6 +9,9 @@ gulp.task('default', function() {
   gulp.src('./src/libs/**/*.js')
     .pipe(gulp.dest('./out/libs/'));
 
+  gulp.src('./src/assets/**/*.png')
+    .pipe(gulp.dest('./out/assets/'));
+
   gulp.src('./src/*.html')
     .pipe(gulp.dest('./out/'));
 

@@ -4,7 +4,7 @@ var AssetManager;
 module.exports = AssetManager = (function() {
   function AssetManager() {}
 
-  AssetManager.prototype.images = [];
+  AssetManager.prototype.images = ["ball.png"];
 
   AssetManager.prototype.sounds = [];
 
@@ -27,6 +27,7 @@ module.exports = AssetManager = (function() {
 
   AssetManager.prototype._process = function(index, callback) {
     var image;
+    console.log(this.images);
     if (index >= this.images.length) {
       this._processSound(0, callback);
       return;
@@ -38,7 +39,7 @@ module.exports = AssetManager = (function() {
       };
     })(this);
     image.src = './assets/' + this.images[index];
-    return this.loaded[images[index]] = image;
+    return this.loaded[this.images[index]] = image;
   };
 
   AssetManager.prototype.initialize = function(callback) {
@@ -223,7 +224,8 @@ module.exports = Drawable = (function() {
 
 
 },{}],3:[function(require,module,exports){
-var AssetManagerImpl, Drawable, GameEngine, SceneLoader;
+var AssetManagerImpl, Drawable, GameEngine, SceneLoader,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Drawable = require('./core/drawable');
 
@@ -239,17 +241,23 @@ GameEngine = (function() {
   GameEngine.prototype.scenes = [];
 
   function GameEngine() {
+    this.postInitialize = bind(this.postInitialize, this);
     this.width = 800;
     this.height = 600;
   }
 
+  GameEngine.prototype.postInitialize = function(callback) {
+    this.canvas = document.getElementById('canvas');
+    this.ctx = canvas.getContext('2d');
+    new SceneLoader(this);
+    if (callback != null) {
+      return callback();
+    }
+  };
+
   GameEngine.prototype.initialize = function(callback) {
     console.log("initlaize");
-    return AssetManager.initialize((function(_this) {
-      return function() {
-        return _this.canvas = document.getElementById('canvas');
-      };
-    })(this), this.ctx = canvas.getContext('2d'), new SceneLoader(this), callback());
+    return AssetManager.initialize(this.postInitialize.bind(this, callback));
   };
 
   GameEngine.prototype.loadScene = function(name) {
@@ -339,29 +347,16 @@ OneThing = (function(superClass) {
 
   OneThing.prototype.name = "title_a";
 
-  OneThing.prototype.name = "title_a";
-
-  OneThing.prototype.font = "24pt 'Oxygen'";
-
-  OneThing.prototype.fontColor = "#FF0000";
-
   OneThing.prototype.x = 330;
 
   OneThing.prototype.y = 202;
 
-  OneThing.prototype.text = "ONE";
-
-  OneThing.prototype.fontSize = 24;
-
-  OneThing.prototype.fontDir = true;
-
   OneThing.prototype.count = 0;
 
   OneThing.prototype.doDraw = function(activeScene, ctx) {
-    this.fontSize = 20 + Math.sin(this.count * 0.2) * 10;
+    this.scale = 20 + Math.sin(this.count * 0.2) * 10;
     this.x = 330 - (20 + Math.sin(this.count * 0.2) * 10);
     this.count = (this.count + 1) % (10 * Math.PI);
-    this.font = Math.round(this.fontSize) + "pt 'Oxygen'";
     return OneThing.__super__.doDraw.call(this, activeScene, ctx);
   };
 
@@ -378,7 +373,9 @@ module.exports = TestArea = (function(superClass) {
     this.doDraw = bind(this.doDraw, this);
     var one, title;
     TestArea.__super__.constructor.apply(this, arguments);
-    one = new OneThing();
+    one = new OneThing({
+      src: "ball.png"
+    });
     title = new Drawable({
       name: "title",
       font: "24pt 'Oxygen'",
@@ -386,7 +383,6 @@ module.exports = TestArea = (function(superClass) {
       y: 200,
       text: "Get to the           escape pod"
     });
-    this.addAsset(title);
     this.addAsset(one);
   }
 

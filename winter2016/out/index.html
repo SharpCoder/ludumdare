@@ -52,16 +52,19 @@
       			}
       		});
 
+					
+
           function game_loop() {
 						Framework.doUpdate();
             Framework.doDraw();
-						requestAnimationFrame(game_loop);
+						setTimeout(game_loop, 15);
           }
 
 					console.log("onload");
 
+					game_loop();
           //update_loop();
-          requestAnimationFrame(game_loop);
+          //requestAnimationFrame(game_loop);
 
 
         });

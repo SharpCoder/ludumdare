@@ -1,6 +1,6 @@
 module.exports = class AssetManager
 
-    images: []
+    images: ["ball.png"]
     sounds: []
     loaded: {}
     loaded_sounds: {}
@@ -17,6 +17,7 @@ module.exports = class AssetManager
 
 
     _process: (index, callback) ->
+      console.log @images
       if index >= @images.length
         @_processSound(0, callback)
         return
@@ -26,7 +27,7 @@ module.exports = class AssetManager
         @_process(index + 1, callback)
 
       image.src = './assets/' + @images[index]
-      @loaded[images[index]] = image
+      @loaded[@images[index]] = image
 
 
     initialize: (callback) ->
@@ -35,6 +36,6 @@ module.exports = class AssetManager
 
     get: (asset) ->
       if @loaded[asset]?
-        return @loaded[asset]
+        return @loaded[asset] 
       else
         throw "Asset '#{asset}' not found"

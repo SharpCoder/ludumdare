@@ -13,15 +13,18 @@ class GameEngine
     @width = 800
     @height = 600
 
+  
+  postInitialize: (callback) =>
+    @canvas = document.getElementById('canvas')
+    @ctx = canvas.getContext('2d')
+    new SceneLoader(@)
+    if callback?
+      callback()
+
 
   initialize: (callback) ->
     console.log "initlaize"
-    AssetManager.initialize(() =>
-        @canvas = document.getElementById('canvas')
-  			@ctx = canvas.getContext('2d')
-        new SceneLoader(@)
-        callback()
-    )
+    AssetManager.initialize(@postInitialize.bind(@, callback))
 
 
   loadScene: (name) ->
