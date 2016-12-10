@@ -1,0 +1,44 @@
+<html>
+	<head>
+		<title>
+			Skyblade - Ludum Dare 32
+		</title>
+
+		<link href='http://fonts.googleapis.com/css?family=Indie+Flower&Open+Sans' rel='stylesheet' type='text/css'>
+		<style type="text/css">
+
+			body {
+				font-family: 'Open Sans', cursive;
+			}
+
+			#canvas_container {
+				width: 800px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+
+			#footer {
+				text-align: center;
+				padding-top: 25px;
+			}
+		</style>
+
+		<!-- Core framework files. -->
+    <script type="text/javascript" src="p2.js"></script>
+		<script type="text/javascript" src="./framework/core.js"></script>
+		<script type="text/javascript" src="./framework/assetmgr.js"></script>
+    <script type="text/javascript" src="game.js"></script>
+		<script type="text/javascript" src="./framework/bootstrap.js"></script>
+	</head>
+	<body onload="doBootstrap();">
+
+		<div id="canvas_container">
+			<canvas id="canvas" width="800" height="800"></canvas>
+		</div>
+
+		<div id="footer">
+			Created by SharpCoder for #LDJAM 32
+		</div>
+
+	</body>
+</html>
