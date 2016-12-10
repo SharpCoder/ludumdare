@@ -12,10 +12,9 @@ module.exports = class Drawable
   height: 0
   scale: 1.0
   text: null
-  font: "12pt 'Josefin Sans'"
+  font: "12pt 'Oxygen'"
   fontColor: "#FFFFFF"
   animate: false
-  animations: []
   animation_index: 0
   rotation: 0
   rox: 0
@@ -26,6 +25,9 @@ module.exports = class Drawable
 
 
   constructor: (config={}) ->
+    # Objects need to be reinstantiated for reasons of pass-by-reference.
+    @animations = new Array()
+
     for key, value of config
       @[key] = value
 
@@ -43,26 +45,25 @@ module.exports = class Drawable
       if @height == 0
         @height = @image.height
 
-    console.log @
 
-
-  show: =>
+  show: ->
     @visible = true
 
 
-  hide: =>
+  hide: ->
     @visible = false
 
 
-  invoke: (event, arg1, arg2) =>
-    if @events[event]?
-      @events[event].call(@, arg1, arg2)
+  invoke: (event, arg1, arg2) ->
+    return
+    # if @events[event]?
+    #   @events[event].call(@, arg1, arg2)
 
     # Bubble the events down
-    #_.map(@assets, (asset) => asset.invoke(event, arg1, arg2))
+    #_.map(@assets, (asset) -> asset.invoke(event, arg1, arg2))
 
 
-  doDraw: (scene, ctx) =>
+  doDraw: (scene, ctx) ->
     return unless @visible
 
     if @image?
@@ -81,33 +82,45 @@ module.exports = class Drawable
         ctx.restore()
 
     if @text? and @text.length > 0
+      ctx.save()
+      ctx.translate(@x, @y)
+      ctx.rotate(@rotation * Math.PI / 180)
+      ctx.translate(-@x, -@y)
       ctx.font = @font
       ctx.fillStyle = @fontColor
       ctx.fillText(@text, @x + @ox, @y + @oy)
-
-    if @children.length > 0
-      for asset in @children
-        asset.doDraw(scene, ctx)
+      ctx.restore()
 
 
-  addAsset: (asset) =>
+    #@invoke("ondraw")
+    for asset in @children
+      asset.doDraw.call(asset, scene, ctx)
+
+
+  addAsset: (asset) ->
     @invoke("onaddasset")
     if asset?
       @children.push(asset)
 
 
-  removeAsset: (assetToRemove) =>
-    items = _.filter(@children, (asset) => asset != assetToRemove)
+  removeAsset: (assetToRemove) ->
+    items = _.filter(@children, (asset) -> asset != assetToRemove)
     delete @childrn
     @children = items
 
 
-  getAssets: (name) =>
-    return _.filter(@children, (asset) => asset.name == name)
+  getAssets: (name) ->
+    return _.filter(@children, (asset) -> asset.name == name)
 
 
-  getAsset: (name) =>
-    return _.find(@children, (asset) => asset.name == name)
+  getAsset: (name) ->
+    return _.find(@children, (asset) -> asset.name == name)
 
 
-  doUpdate: =>
+  doUpdate: ->
+    @invoke("onupdate")
+    @x += @vx
+    @y += @vy
+
+    @invoke("onupdateassets")
+    #_.map(@children, (asset) -> asset.doUpdate())

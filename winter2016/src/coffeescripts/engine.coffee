@@ -15,6 +15,7 @@ class GameEngine
 
 
   initialize: (callback) ->
+    console.log "initlaize"
     AssetManager.initialize(() =>
         @canvas = document.getElementById('canvas')
   			@ctx = canvas.getContext('2d')
@@ -40,7 +41,7 @@ class GameEngine
   doDraw: ->
     if @activeScene?
       @ctx.clearRect(0, 0, 800, 800)
-      @activeScene?.doDraw(@activeScene, @ctx)
+      @activeScene.doDraw(@activeScene, @ctx)
 
 
   doUpdate: ->

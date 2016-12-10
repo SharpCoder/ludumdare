@@ -4,12 +4,12 @@
 			Ludum Dare 37 - Death by a thousand cuts
 		</title>
 
-		<link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css' />
+		<link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css' />
 		<style type="text/css">
 			body {
         background-image: url('https://s-media-cache-ak0.pinimg.com/736x/f2/26/a6/f226a6c9fd2f88813e843d891bacba4b.jpg');
         background-repeat: repeat;;
-				font-family: 'Josefin Sans', sans-serif;
+				font-family: 'Oxygen', sans-serif;
 				background-color: #000F26;
 				color: white;
 			}
@@ -27,8 +27,9 @@
 
 		<!-- Core framework files. -->
 		<script type="text/javascript" src="./libs/underscore.js"></script>
-		<script type="text/javascript" src="bundle.js"></script>
+		<script type="text/javascript" src="./bundle.js"></script>
     <script type="text/javascript">
+
       function doBootstrap() {
 
         Framework.initialize(function() {
@@ -51,18 +52,16 @@
       			}
       		});
 
-          function update_loop() {
-            Framework.doUpdate();
-            setTimeout( update_loop, 20 );
-          }
-
-          function draw_loop() {
+          function game_loop() {
+						Framework.doUpdate();
             Framework.doDraw();
-            setTimeout( draw_loop, 20 );
+						requestAnimationFrame(game_loop);
           }
 
-          update_loop();
-          draw_loop();
+					console.log("onload");
+
+          //update_loop();
+          requestAnimationFrame(game_loop);
 
 
         });
