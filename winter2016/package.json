@@ -1,0 +1,19 @@
+{
+  "name": "winter2016",
+  "version": "1.0.0",
+  "description": "ludum dare game for ld37",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "coffeeify": "^2.1.0",
+    "gulp": "^3.9.1",
+    "gulp-browserify": "^0.5.1",
+    "gulp-coffee": "^2.3.3",
+    "gulp-concat": "^2.6.1",
+    "gulp-less": "^3.3.0"
+  }
+}

@@ -1,0 +1,84 @@
+<html>
+	<head>
+		<title>
+			Ludum Dare 37 - Death by a thousand cuts
+		</title>
+
+		<link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css' />
+		<style type="text/css">
+			body {
+        background-image: url('https://s-media-cache-ak0.pinimg.com/736x/f2/26/a6/f226a6c9fd2f88813e843d891bacba4b.jpg');
+        background-repeat: repeat;;
+				font-family: 'Josefin Sans', sans-serif;
+				background-color: #000F26;
+				color: white;
+			}
+			#canvas_container {
+				width: 800px;
+				margin-left: auto;
+				margin-right: auto;
+				border: 2px solid white;
+			}
+			#footer {
+				text-align: center;
+				padding-top: 25px;
+			}
+		</style>
+
+		<!-- Core framework files. -->
+		<script type="text/javascript" src="./libs/underscore.js"></script>
+		<script type="text/javascript" src="bundle.js"></script>
+    <script type="text/javascript">
+      function doBootstrap() {
+
+        Framework.initialize(function() {
+
+          document.getElementById("canvas_container").onmousedown = function(evt){
+            if ( evt.offsetX === undefined || evt.offsetY === undefined ) {
+              var rect = document.getElementById("canvas_container").getBoundingClientRect();
+              Framework.doMouseDown( evt.clientX - rect.left, evt.clientY - rect.top );
+            } else {
+              Framework.doMouseDown( evt.offsetX, evt.offsetY );
+            }
+          };
+
+          document.getElementById("canvas_container").addEventListener("mousemove", function(evt) {
+      			if ( evt.offsetX === undefined || evt.offsetY === undefined ) {
+      				var rect = document.getElementById("canvas_container").getBoundingClientRect();
+      				Framework.doMouseMove( evt.clientX - rect.left, evt.clientY - rect.top );
+      			} else {
+      				Framework.doMouseMove( evt.offsetX, evt.offsetY );
+      			}
+      		});
+
+          function update_loop() {
+            Framework.doUpdate();
+            setTimeout( update_loop, 20 );
+          }
+
+          function draw_loop() {
+            Framework.doDraw();
+            setTimeout( draw_loop, 20 );
+          }
+
+          update_loop();
+          draw_loop();
+
+
+        });
+
+      }
+    </script>
+	</head>
+	<body onload="doBootstrap();">
+
+		<div id="canvas_container">
+			<canvas id="canvas" width="800" height="600"></canvas>
+		</div>
+
+		<div id="footer">
+			Created by SharpCoder
+		</div>
+
+	</body>
+</html>
