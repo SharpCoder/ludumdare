@@ -10,8 +10,13 @@ Scenes = (function() {
         listeners: {
           onupdate: function() {
             this.scale = 20 + Math.sin(this.count * 0.2) * 10
-            //@x = 330 - (20 + Math.sin(@count * 0.2) * 10)
-            this.count = (this.count + 1) % (10 * Math.PI)
+
+            var newCount = (this.count + 1) % (10 * Math.PI);
+            if (newCount < this.count) {
+              this.count = 0;
+            } else {
+              this.count = newCount;
+            }
           }
         }
       });
@@ -19,9 +24,12 @@ Scenes = (function() {
       game = new Drawable({
         listeners: {
           ondraw: function(ctx) {
-            ctx.rect(0, 0, 800, 600)
-            ctx.fillStyle = "#000"
-            ctx.fill()
+            ctx.clearRect(0, 0, 800, 600);
+            ctx.save();
+            ctx.rect(0, 0, 800, 600);
+            ctx.fillStyle = "#000";
+            ctx.fill();
+            ctx.restore();
           }
         }
       });
