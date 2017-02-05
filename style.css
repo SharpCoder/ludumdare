@@ -1,0 +1,44 @@
+h1 {
+  font-family: 'Barrio', cursive;
+}
+
+body {
+  font-family: 'Pangolin', cursive;
+  margin: 40px;
+}
+
+.site-title {
+  margin-bottom: 30px;
+}
+
+.card-image img {
+  padding-bottom: 35px;
+  width: 100%;
+}
+
+.card-title {
+  font-weight: bold;
+  font-size: 200%;
+}
+
+.card-subtext {
+  
+}
+
+.card {
+  border: 2px solid #BBB;
+  min-height: 500px;
+  margin-bottom: 20px;
+}
+
+.card-subtext {
+  height: 50px;
+}
+
+.card-action {
+  padding-top: 25px;
+  font-size: 150%;
+}
+.inner {
+  
+}
