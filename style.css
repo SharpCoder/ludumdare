@@ -1,14 +1,34 @@
-h1 {
-  font-family: 'Barrio', cursive;
+body {
+  font-family: 'Catamaran', sans-serif;
 }
 
-body {
-  font-family: 'Pangolin', cursive;
-  margin: 40px;
+h1 {
+  color: white;
+  font-family: 'Sahitya', serif;
+  background-color: #223f4a;
+  
+  background: linear-gradient(to right, #223f4a , #b6d1df);
+  
+  line-height: 100px;
+  vertical-align: middle;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  
+  border-bottom: 2px solid black;
 }
 
 .site-title {
+  padding: 10px 100px;
   margin-bottom: 30px;
+}
+
+.site-title p {
+  font-size: 150%;
+}
+
+.site-content {
+  margin-top: 40px;
 }
 
 .card-image img {
@@ -34,7 +54,9 @@ body {
 }
 
 .card-subtext {
-  height: 50px;
+  min-height: 50px;
+  font-size: 140%;
+  padding: 20px;
 }
 
 .card-action {
