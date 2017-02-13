@@ -1,0 +1,46 @@
+<html>
+	<head>
+		<title>
+			Ludum Dare 31 - Snowman Simulator 2014
+		</title>
+
+		<link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css' />
+		<style type="text/css">
+
+			body {
+				font-family: 'Josefin Sans', sans-serif;
+				background-color: #000F26;
+				color: white;
+			}
+
+			#canvas_container {
+				width: 800px;
+				margin-left: auto;
+				margin-right: auto;
+				border: 2px solid white;
+			}
+
+			#footer {
+				text-align: center;
+				padding-top: 25px;
+			}
+		</style>
+
+		<!-- Core framework files. -->
+		<script type="text/javascript" src="core.js"></script>
+		<script type="text/javascript" src="assetmgr.js"></script>
+		<script type="text/javascript" src="scenes.js"></script>
+		<script type="text/javascript" src="bootstrap.js"></script>
+	</head>
+	<body onload="doBootstrap();">
+
+		<div id="canvas_container">
+			<canvas id="canvas" width="800" height="800"></canvas>
+		</div>
+
+		<div id="footer">
+			Created by SharpCoder and KevinEvans for Ludum Dare #31
+		</div>
+
+	</body>
+</html>
