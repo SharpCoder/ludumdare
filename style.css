@@ -44,6 +44,11 @@ h1 {
   padding-bottom: 10px;
 }
 
+.alt-action, .alt-action:hover {
+  margin-left: 30px;
+  color: #4527A0;
+}
+
 .card {
   border: 2px solid #BBB;
   min-height: 500px;
@@ -58,7 +63,7 @@ h1 {
 
 .card-action {
   padding-top: 25px;
-  font-size: 150%;
+  font-size: 125%;
 }
 .inner {
   
