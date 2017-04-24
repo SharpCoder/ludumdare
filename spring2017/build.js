@@ -12635,8 +12635,9 @@ class MainScene extends Scene {
     if (Math.random() > 0.5) tpX *= -1;
     if (Math.random() > 0.5) tpY *= -1;
 
+    let planetTypes = ["planet0", "planet1", "planet2", "planet4"];
     let targetPlanet = new ForestPlanet({
-      image: "planet0",
+      image: planetTypes[Math.round(Math.random() * (planetTypes.length - 1))],
       x: tpX,
       y: tpY,
       width: Math.min(targetPlanetSize, 600),
@@ -12646,6 +12647,8 @@ class MainScene extends Scene {
     if (!planet) {
       planet = new ForestPlanet({
         image: "planet1",
+        width: 250,
+        height: 250,
         mainGravitySource: true
       });
     } else {
