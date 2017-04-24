@@ -1,6 +1,8 @@
 body {
   font-family: 'Neucha', cursive;
   background-image: url('assets/space_bg6.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
   color: white;
 }
 .title {
@@ -17,4 +19,14 @@ body {
   width: 100%;
   max-width: 1000px;
   height: calc(80%);
+}
+.canvas-container canvas {
+  display: none;
+}
+.loading {
+  display: flex;
+  justify-content: center;
+  font-size: 48px;
+  height: 250px;
+  padding-top: 150px;
 }

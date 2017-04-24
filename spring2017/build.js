@@ -11809,7 +11809,7 @@ class Assets {
   constructor(klasscb) {
     var ctx = this;
     this.loaded = {};
-    this.sounds = [];
+    this.sounds = ["bg_loop.mp3", "rocket_start.mp3", "explosion.mp3", "success.mp3"];
     this.images = ["explosion_1.png", "explosion_2.png", "explosion_3.png", "explosion_4.png", "explosion_5.png", "planet1.png", "planet4.png", "space_bg6.jpg", "planet0.png", "planet2.png", "tree.png", "arrow.png", "rocket.png"];
 
     function processSounds(index, callback) {
@@ -11818,7 +11818,8 @@ class Assets {
         return;
       }
 
-      this.loaded[name] = new Audio('./audio/' + this.sounds[index]);
+      let name = removeExt(this.sounds[index]);
+      this.loaded[name] = new Audio('./assets/' + this.sounds[index]);
       processSounds.call(ctx, index + 1, callback);
     }
 
@@ -12001,7 +12002,8 @@ class Drawable {
           let distance = distances[body];
           // 28000 is the "Josh constant" which provides good
           // gravity.
-          let intensity = 29000 / Math.pow(distance, 2);
+          //let intensity = 29000 / Math.pow(distance, 2);
+          let intensity = 45000 / Math.pow(distance, 2);
           if (closestBody == body) {
             intensity = Math.max(intensity, 0.25);
           }
@@ -12092,6 +12094,10 @@ class Engine {
     window.score = 0;
     window.fuel = 100;
 
+    // Take away loading screen
+    $("canvas").css("display", "block");
+    $(".loading").css("display", "none");
+
     let canvas = document.getElementById(canvasId);
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -12109,8 +12115,13 @@ class Engine {
     this.fpsInterval = 1000 / targetFPS;
     this.then = Date.now();
     this.startTime = this.then;
+
+    // Some framework stuff
     this.render();
+    this.loop();
   }
+
+  loop() {}
 
   render() {
     // Do forever.
@@ -12150,6 +12161,7 @@ class Engine {
 
   setScene(title) {
     this.activeScene = this.sceneNames.indexOf(title);
+    this.scenes[this.activeScene].onStart();
   }
 
   mouseMove(x, y) {
@@ -12189,6 +12201,7 @@ var GameOver = require('./scenes/gameOver');
 
 $(document).ready(function () {
   window.Assets = new Assets(function () {
+
     let engine = new Engine("canvas");
     engine.addScene(new TitleScene());
     engine.addScene(new MainScene());
@@ -12420,6 +12433,8 @@ class Hud extends Drawable {
     }
 
     ctx.font = "24px Neucha";
+    ctx.fillStyle = "#87cb41";
+    ctx.fillText("Level: " + window.level, 20, 150 + 200);
     ctx.fillStyle = "#FFF";
     ctx.fillText("Fuel: " + window.fuel, 20, 150 + 50);
     ctx.fillText("Power: " + this.power, 20, 150 + 100);
@@ -12484,6 +12499,8 @@ class Scene extends Drawable {
     this.targetScale = 1.0;
     this.rumbling = false;
   }
+
+  onStart() {}
 
   setScale(scale) {
     this.scale = scale;
@@ -12582,8 +12599,16 @@ class MainScene extends Scene {
       title: "MainScene"
     }));
 
+    this.explosion_sound = Assets.get("explosion");
+    this.rocket_sound = Assets.get("rocket_start");
     this.then = Date.now();
     this.generateWorld(1);
+  }
+
+  onStart() {
+    let music = Assets.get("bg_loop");
+    music.loop = true;
+    music.play();
   }
 
   generateWorld(level, planet) {
@@ -12591,15 +12616,22 @@ class MainScene extends Scene {
     window.level = level;
     window.fuel = 100 * level;
 
+    this.zoomTo(0.9);
+    this.rocket_sound.load();
+    this.rocket_sound.pause();
+    this.explosion_sound.load();
+    this.explosion_sound.pause();
+
     delete this.player;
     delete this.world;
     delete this.assets;
     this.assets = [];
     let world = new Drawable();
 
-    let targetPlanetSize = 250 + Math.round(Math.random() * (250 * level));
+    let targetPlanetSize = 150 + Math.round(Math.random() * (150 * level));
     let tpX = 800 + 150 * Math.random() * level;
     let tpY = 800 + 150 * Math.random() * level;
+
     if (Math.random() > 0.5) tpX *= -1;
     if (Math.random() > 0.5) tpY *= -1;
 
@@ -12611,7 +12643,7 @@ class MainScene extends Scene {
       height: Math.min(targetPlanetSize, 600)
     });
 
-    if (!exists(planet)) {
+    if (!planet) {
       planet = new ForestPlanet({
         image: "planet1",
         mainGravitySource: true
@@ -12698,12 +12730,13 @@ class MainScene extends Scene {
         this.player.vy = 0;
         this.player.vx = 0;
 
+        Assets.get("success").play();
         this.world.addAsset(new Nice({
           text: "Nice!",
           x: this.player.getX(),
           y: this.player.getY(),
           success: function () {
-            vtx.generateWorld(level + 1, this.targetPlanet);
+            vtx.generateWorld(level + 1, vtx.targetPlanet);
           }
         }));
       }
@@ -12720,6 +12753,9 @@ class MainScene extends Scene {
       if (this.player.gtime > 50 && distance < 80 && this.gameOver != true) {
         this.gameOver = true;
         this.player.setVisible(false);
+
+        this.explosion_sound.load();
+        this.explosion_sound.play();
 
         // Arbitrary positioning ftw
         this.addAsset(new Explosion({
@@ -12749,6 +12785,9 @@ class MainScene extends Scene {
     // allow rumble.
     if (this.player.gravity == false) {
       this.player.startRumble();
+      this.rocket_sound.loop = true;
+      this.rocket_sound.load();
+      this.rocket_sound.play();
     }
   }
 
@@ -12756,6 +12795,8 @@ class MainScene extends Scene {
     this.mouse = false;
     let power = this.calculatePower();
     this.player.stopRumble();
+    this.rocket_sound.pause();
+    this.explosion_sound.play();
     this.zoomTo(0.40, 0.08);
 
     if (this.player.gravity == false) {
