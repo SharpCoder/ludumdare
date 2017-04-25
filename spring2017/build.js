@@ -12017,11 +12017,14 @@ class Drawable {
           ctx.vy += unitVectorY * intensity;
 
           if (body.mainGravitySource) {
-            ctx.sr = -90 + Math.atan2(unitVectorY, unitVectorX) * 180 / Math.PI;
+            // ctx.sr = -90 + (Math.atan2(unitVectorY, unitVectorX) * 180 / Math.PI);
           }
         });
 
-        ctx.sr = -90 + Math.atan2(-this.vy, -this.vx) * 180 / Math.PI;
+        let thetaY = this.getY() - ch / 2;
+        let thetaX = this.getX() - cw / 2;
+
+        ctx.sr = -270 + Math.atan2(thetaY, thetaX) * 180 / Math.PI;
       }
     }
 
@@ -12329,6 +12332,7 @@ class ForestPlanet extends Drawable {
       x: 250,
       y: 250,
       mass: 150,
+      rotationSpeed: .75 + 1 * Math.random(),
       rotatePlayer: true
     }));
 
@@ -12374,7 +12378,7 @@ class ForestPlanet extends Drawable {
   }
 
   update(cw, ch) {
-    this.rotation += .75;
+    this.rotation += this.rotationSpeed;
     if (this.mainGravitySource) {
       this.y = ch / 2;
       this.x = cw / 2;
@@ -12614,7 +12618,7 @@ class MainScene extends Scene {
   generateWorld(level, planet) {
     level = level || 1;
     window.level = level;
-    window.fuel = 100 * level;
+    window.fuel = 50 + 25 * level;
 
     this.zoomTo(0.9);
     this.rocket_sound.load();
@@ -12640,8 +12644,8 @@ class MainScene extends Scene {
       image: planetTypes[Math.round(Math.random() * (planetTypes.length - 1))],
       x: tpX,
       y: tpY,
-      width: Math.min(targetPlanetSize, 600),
-      height: Math.min(targetPlanetSize, 600)
+      width: Math.min(targetPlanetSize, 500),
+      height: Math.min(targetPlanetSize, 500)
     });
 
     if (!planet) {
